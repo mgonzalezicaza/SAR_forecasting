@@ -69,7 +69,7 @@ The model is driven by an Excel input file and run entirely through Stata. All d
 | `$standardization` | `"yes"` — standardizes variables before matching |
 | `$rn_int_remitt` | `"no"` — neutral distribution for international remittances |
 | `$rn_dom_remitt` | `"no"` — neutral distribution for domestic remittances |
-| `$cons_re_scale` | `"yes"` — rescales final consumption to match private consumption growth |
+| `$cons_re_scale` | `"no"` — final consumption is **not** rescaled to macro private consumption growth in the active India run |
 | `$year` | `2023` — base year |
 | `$final_year` | `2028` — last year to simulate |
 | `$ppp` | `2021` — PPP vintage |
@@ -469,6 +469,8 @@ h_nlai_s = h_*_remit_s + h_pensions_s + h_capital_s + h_renta_imp_s + h_otherinl
 ### `social_programs.do` — Social Transfer Program Simulation (India)
 
 **Objective:** Simulates changes in government cash transfer programs (PDS food subsidies and other schemes) using program-specific expenditure targets provided by the fiscal/policy team.
+
+> ⚠️ **Note:** The file header incorrectly reads *"Change in Non-labor Income Maldives"* — this is a copy-paste artefact. The content and all hard-coded values are India-specific.
 
 **Inputs:**
 - `h_pds`: baseline household PDS (Public Distribution System) transfer receipts.

@@ -378,9 +378,13 @@ This is crucial for India specifically. The national poverty line is defined in 
 ### Step 2.14 — Compute new consumption (`16_new_consumption.do`)
 
 **What it does:**  
-Applies the matched ratio to produce `welfare_s` — the simulated per-capita consumption for each household.
+Applies the matched ratio to produce `welfare_s` — the simulated per-capita consumption for each household:
 
-Then applies a **final proportional rescaling** so that the aggregate growth in mean simulated consumption matches the macro-projected growth in private consumption per capita. This ensures full consistency with the national accounts.
+    welfare_s = pc_inc_s / new_ratio
+
+For households where the ratio is zero or negative (edge case), welfare is set to `welfare_base × (1 + private consumption growth)` as a fallback.
+
+> **Note for India:** The optional macro rescaling step (`$cons_re_scale`) is **turned off** (`"no"`) in the India run. This means the model does *not* force aggregate simulated consumption to match the national-accounts private consumption growth rate. The income-to-consumption matching in Step 2.13 is sufficient to bridge income to consumption without an additional macro anchor. The rescaling option remains available for other country runs.
 
 ---
 
@@ -521,6 +525,7 @@ Here is the entire model in one narrative:
    - Scale everyone's wages so that average wages per cell match the projected wage growth.
    - Update non-labor income components (pensions, remittances, social transfers) using program-specific growth rates.
    - Convert household income to consumption using a nearest-neighbor matched income-to-consumption ratio.
+   - For India, no macro rescaling is applied — consumption is anchored to the matched ratio alone (the macro private-consumption rescaling switch is off).
    - Rescale final consumption so the aggregate matches macro private consumption growth.
 
 5. **We save the simulated household dataset** for each year (2024–2028).

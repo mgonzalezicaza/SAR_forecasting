@@ -424,7 +424,7 @@ This is a **proportional (multiplicative) scaling** — it shifts the mean witho
 | `10_income_rel_new.do` | Yes | Micro wage growth + GDP consistency check |
 | `10_income_rel_new_no_rescaling.do` | No | Micro wage growth targets only |
 
-For India, GDP-level rescaling is skipped because the income-to-consumption bridge (Steps 2.13–2.14) provides the macro anchor via private consumption rescaling.
+For India, GDP-level rescaling of labor income is **skipped** (`$inc_re_scale = "no"`). The income-to-consumption bridge (Steps 2.13–2.14) also does **not** apply a macro private consumption rescaling (`$cons_re_scale = "no"`). India's simulated consumption distribution is therefore anchored purely by the micro-level wage growth targets and the nearest-neighbor matched income-to-consumption ratios — with no national-accounts consistency constraint imposed. This is a deliberate methodological choice given the well-documented India survey-to-national-accounts consumption gap.
 
 #### Critical assumptions
 
@@ -514,30 +514,29 @@ For each household h, nearest neighbor h' is found within matching cells. The ma
 
 ---
 
-### Step 2.14 — Consumption Computation and Macro Rescaling (`16_new_consumption.do`)
+### Step 2.14 — Consumption Computation (`16_new_consumption.do`)
 
-**Step A:**
+**Step A — Base computation:**
 
-    welfare_s_{h,t} = r_{h'} * ipcf_ppp_s_{h,t}
+    welfare_s_{h,t} = pc_inc_s_{h,t} / r_{h'}
 
-**Step B — Macro rescaling:**
+where `r_{h'}` is the income-to-consumption ratio from the nearest-neighbor donor matched in Step 2.13. For households where `r ≤ 0` (edge case), a fallback is applied:
 
-Population-weighted mean: c_bar_t^sim.  
-Macro target: c_bar_t^macro = c_bar_2023^survey * G_t^priv_cons, where G_t^priv_cons is the cumulative growth in private consumption per capita from MFM.
+    welfare_s_{h,t} = welfare_base_{h} * (1 + G_t^priv_cons)
 
-Global rescaling factor:
+**Step B — Macro rescaling (optional, `$cons_re_scale`):**
 
-    mu_t = c_bar_t^macro / c_bar_t^sim
+For India, `$cons_re_scale = "no"` — **this step is not executed**. Simulated consumption is determined entirely by the income-to-consumption ratio from Step 2.13, with no national-accounts anchor applied. The option exists for other country runs where macro consistency is required:
 
-Applied uniformly: welfare_s_{h,t}^final = welfare_s_{h,t} * mu_t.
+> If activated: population-weighted mean `c_bar_t^sim` is computed; a global rescaling factor `mu_t = c_bar_t^macro / c_bar_t^sim` is applied uniformly, where `c_bar_t^macro = c_bar_2023^survey * G_t^priv_cons`.
 
 #### Critical assumptions
 
-1. **National accounts private consumption = household welfare.** This equivalence is imperfect. Private consumption in national accounts includes imputed rents, NPISH expenditures, and items not captured in surveys. The survey-to-national-accounts consumption ratio in India has been growing — this well-documented gap is not addressed.
+1. **For India, no national accounts anchor is applied.** Simulated welfare levels are grounded purely in the microdata structure and the micro wage growth targets. This avoids the India survey-to-national-accounts consumption gap problem but means there is no external consistency check on the level of simulated consumption.
 
-2. **The global rescaling factor mu_t is uniform across the distribution.** Every household's consumption is scaled by the same factor regardless of income level. This preserves the *relative* distribution (inequality is unchanged by the rescaling) but ensures the *level* matches the macro aggregate. If private consumption growth is concentrated at the top (as is plausible in India), this will overstate consumption growth for the poor and understate it for the rich.
+2. **The income-to-consumption ratio is treated as time-invariant conditional on matching cells.** If the aggregate savings rate changes (e.g., precautionary savings in a downturn scenario), the assumed ratios will be incorrect.
 
-3. **Private consumption growth is the correct welfare anchor.** An alternative would be to anchor to GDP per capita or real household disposable income. Private consumption is the closest national accounts concept to household welfare, but it introduces a dependency on the accuracy of national accounts.
+3. **The global rescaling factor (if active) is uniform across the distribution.** Every household's consumption is scaled by the same factor regardless of income level. This preserves the *relative* distribution but cannot simulate distributional changes in the savings rate.
 
 4. **The income-to-consumption conversion ratio (Step 2.13) and the macro rescaling (Step 2.14) are applied sequentially and independently.** If the income-to-consumption ratios were themselves affected by the macroeconomic environment (e.g., households save more in response to uncertainty), this sequential independence would be incorrect.
 
