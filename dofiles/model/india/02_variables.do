@@ -173,7 +173,7 @@ if abs(tot_lai - lai_orig) > 1 & abs(tot_lai - lai_orig) != . di in red "WARNING
 drop lai_orig
 
 * total household labor incomes
-egen h_lai = sum(tot_lai) if hogarsec != 1, by(id) missing
+egen h_lai = sum(tot_lai) /*if hogarsec != 1*/, by(id) missing
 
 * Household size
 clonevar h_size = hsize
@@ -190,7 +190,7 @@ if $national == 0 {
 	local var "capital_ppp pensions_ppp otherinla_ppp remitt_ppp int_remit_ppp dom_remit_ppp ns_remit_ppp renta_imp_ppp transfers_ppp oth_schemes_ppp pds_ppp"
 	
 	foreach x of local var {
-		egen     h_`x' = sum(`x') if hogarsec != 1, by(id) missing
+		egen     h_`x' = sum(`x') /*if hogarsec != 1*/, by(id) missing
 		replace  h_`x' = . if h_`x' == 0	
 	}
 } 

@@ -55,7 +55,7 @@ gl matching			"yes"	// Change for "yes" or "no" to activate matching for consump
 gl standardization	"yes"	// Performs variables standardization before matching
 gl rn_int_remitt 	"no" 	// Change for "yes" or "no" (neutral distribution) on modelling intern. remittances
 gl rn_dom_remitt 	"no" 	// Change for "yes" or "no" (neutral distribution) on modelling domestic remittances
-gl cons_re_scale 	"yes" 	// Change for "yes"/"no" re-scale final consumption using private consumption
+gl cons_re_scale 	"no" 	// Change for "yes"/"no" re-scale final consumption using private consumption
 
 
 /*===================================================================================================
