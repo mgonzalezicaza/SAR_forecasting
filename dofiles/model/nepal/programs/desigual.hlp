@@ -1,0 +1,26 @@
+{smcl}
+{* 12apr2004}{...}
+{hline}
+help for {hi:desigual}{right: Martin Cicowiez}
+{hline}
+
+{title:Medidas de Desigualdad}
+
+{p 4 8 2}
+{cmd:desigual}
+[{it:varlist}]
+[{it:weight}]
+[{cmd:if} {it:exp}]
+[{cmd:,}
+  {cmdab:tipo:_reporte(}{it:#}{cmd:)} ]
+
+
+{title:Ejemplos}
+
+{p 4 10 2}{cmd:. desigual ipcf}{p_end}
+{p 4 10 2}{cmd:. desigual ipcf [w=pondera] if ipcf>0, tipo_reporte(1)}
+
+{title:Autor}
+
+{p 4 4 2}
+Si encontras algun problema escribile a {browse "mailto:martin@depeco.econo.unlp.edu.ar":Martin Cicowiez}. Centro de Estudios Distributivos, Laborales y Sociales (CEDLAS). Universidad Nacional de La Plata.
