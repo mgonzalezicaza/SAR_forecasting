@@ -32,7 +32,9 @@ set more off
 * NOTE: YOU ONLY NEED TO CHANGE THESE OPTIONS
 
 * Globals for general paths
-gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
+loc ppath   = 1
+if `ppath' == 1 gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
+else            gl priv_path 	"C:\Users\wb316966\WBG\Kelly Yelitza Montoya Munoz - Microsimulations"
 gl path  		"$priv_path\SM2026"
 gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\sri_lanka"	// Do-files path
 
@@ -44,14 +46,14 @@ gl year 		2019	// Year to upload - Base year dataset
 gl final_year 	2028	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_conflict.xlsm" // Country's input Excel file
+gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_conflict_HIES.xlsm" // Country's input Excel file
 cap mkdir 	"${path}/${country}\Data"
 gl data_out "${path}/${country}\Data"
 
 * Parameters
 gl sector_model 	6 		// Change for "3" or "6" to change intrasectoral variation
-gl inc_re_scale 	"no" 	// Change for "yes"/"no" re-scale labor income using gdp
-gl matching			"yes"	// Change for "yes" or "no" to activate matching for consumption to inncome ratio
+gl inc_re_scale 	"yes" 	// Change for "yes"/"no" re-scale labor income using gdp
+gl matching			"yes"	// Change for "yes" or "no" to activate matching for consumption to income ratio
 gl standardization	"yes"	// Performs variables standardization before matching
 gl rn_int_remitt 	"yes" 	// Change for "yes" or "no" (neutral distribution) on modelling intern. remittances
 gl rn_dom_remitt 	"yes" 	// Change for "yes" or "no" (neutral distribution) on modelling domestic remittances
@@ -64,6 +66,7 @@ gl cons_re_scale 	"no" 	// Change for "yes"/"no" re-scale final consumption usin
 
 * Support module - CPIs and PPPs
 dlw, country(Support) year(2005) type(GMDRAW) surveyid(Support_2005_CPI_v${cpi_version}_M) filename(Final_CPI_PPP_to_be_used.dta)
+
 keep if code == "${country}" & year == ${year}
 keep code year cpi${ppp} icp${ppp}
 rename code countrycode
@@ -88,6 +91,7 @@ use `IND'
 merge 1:1 hhid pid using `LBR', nogen keep(1 3) force
 merge 1:1 hhid pid using `INC', nogen keep(1 3)
 merge m:1 countrycode year using `dlwcpi', nogen keep(1 3)
+merge m:1 district using "$priv_path\SM2026\LKA\cash_transfers\spatial_priceindex.dta", nogen
 
 
 /*===================================================================================================
@@ -147,17 +151,36 @@ foreach f of local files{
 sum poor* [aw = fexp_s] if welfare_s != .
 ineqdec0 welfare_s [aw = fexp_s]
 
-*gen pline_nat_ppp = pline_nat / cpi$ppp / icp$ppp
+*gen pline_nat_ppp = pline_nat2 / cpi$ppp / icp$ppp
 *apoverty welfare_s [aw = fexp_s] if welfare_s != ., varpl(pline_nat_ppp) h igr gen(poor_nat)
 
 *apoverty welfare_base [aw = fexp_base] if welfare_base != ., varpl(pline_nat_ppp)
-/*
-apoverty welfare_base [aw = fexp_s] if welfare_base != ., varpl(pl1) h igr gen(poor1_base)
-apoverty welfare_base [aw = fexp_s] if welfare_base != ., varpl(pl2) h igr gen(poor2_base)
-apoverty welfare_base [aw = fexp_s] if welfare_base != ., varpl(pl3) h igr gen(poor3_base)
+
+qui apoverty welfare_base [aw = fexp_s] if welfare_base != ., varpl(pl1) h igr gen(poor1_base)
+qui apoverty welfare_base [aw = fexp_s] if welfare_base != ., varpl(pl2) h igr gen(poor2_base)
+qui apoverty welfare_base [aw = fexp_s] if welfare_base != ., varpl(pl3) h igr gen(poor3_base)
 
 sum poor1_base poor2_base poor3_base [aw = fexp_base] if welfare_base != .
 ineqdec0 welfare_base [aw = fexp_base]
+
+	
+/*===================================================================================================
+	- Non-labor income vectors for S2S imputation
+===================================================================================================*/
+
+if ${model} == 2024 {
+	
+	keep hhid h_pensions_s h_capital_s h_transfers_s h_ns_remit_s h_dom_remit_s h_int_remit_s h_otherinla_s h_renta_imp_s cpi2021 icp2021
+
+	collapse (first) cpi2021 icp2021 (sum) h_pensions_s h_capital_s h_transfers_s h_ns_remit_s h_dom_remit_s h_int_remit_s h_otherinla_s h_renta_imp_s, by(hhid)
+
+	for any h_pensions_s h_capital_s h_transfers_s h_ns_remit_s h_dom_remit_s h_int_remit_s h_otherinla_s h_renta_imp_s: gen X_2019pr = X * cpi$ppp * icp$ppp
+	
+	compress 
+	if "$cons_re_scale" == "yes" save "$priv_path\SM2026\LKA\nonlabor_inc_2024_cons.dta", replace
+	if "$inc_re_scale" == "yes" save "$priv_path\SM2026\LKA\nonlabor_inc_2024_gdp.dta", replace
+} 
+
 
 /*===================================================================================================
 	- Display running time
