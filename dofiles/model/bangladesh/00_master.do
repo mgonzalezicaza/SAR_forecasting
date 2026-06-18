@@ -44,7 +44,7 @@ gl year 		2022	// Year to upload - Base year dataset
 gl final_year 	2028	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}.xlsm" // Country's input Excel file
+gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_Baseline2025.xlsm" // Country's input Excel file
 cap mkdir 	"${path}/${country}\Data"
 gl data_out "${path}/${country}\Data"
 
