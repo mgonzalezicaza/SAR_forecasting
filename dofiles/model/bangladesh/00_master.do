@@ -34,7 +34,7 @@ set more off
 * Globals for general paths
 gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
 gl path  		"$priv_path\SM2026"
-gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model"	// Do-files path
+gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\bangladesh"	// Do-files path
 
 * Globals for country-year identification
 gl cpi_version 	14
@@ -44,7 +44,7 @@ gl year 		2022	// Year to upload - Base year dataset
 gl final_year 	2028	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_Baseline2025.xlsm" // Country's input Excel file
+gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_preconflict.xlsm" // Country's input Excel file
 cap mkdir 	"${path}/${country}\Data"
 gl data_out "${path}/${country}\Data"
 
@@ -76,6 +76,7 @@ foreach m of local modules {
 	
 	di in red "`m'"
 	if "${country}" == "BGD" & ${year} == 2016 & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(BGD_2016_HIES_v01_M_v07_A_SARMD_IND.dta) clear nocpi
+	if "${country}" == "BGD" & ${year} == 2022 & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(BGD_2022_HIES_v02_M_v05_A_SARMD_IND.dta) clear nocpi
 	else if "${country}" == "LKA" & inlist(${year},2009,2012) & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(LKA_${year}_HIES_v01_M_v06_A_SARMD_IND.dta) clear nocpi
 	else dlw, count("${country}") y(${year}) t(sarmd) mod(`m') clear nocpi
 	tempfile `m'

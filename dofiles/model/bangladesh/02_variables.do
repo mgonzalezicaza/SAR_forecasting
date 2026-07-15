@@ -62,25 +62,8 @@ gen itranp_ns = itran_ns
 
 * deflate welfare // Needs to be fixed in SARMD and dlw
 if "${country}${year}" == "BGD2022" {
-
-			sum   zu_cbn [aw=wgt] 
-			local mean_nat = r(mean)
-			
-			/*
-			sum   welfare [aw=wgt] 
-			local avg = r(mean)
-
-			gen welfare_adj = welfare*`mean_nat'/zu_cbn
-			sum welfare_adj [aw=wgt] 
-			local avg2 = r(mean)
-			replace welfare = welfare_adj*`avg'/`avg2'
-			drop welfare_adj
-			*/
-			replace welfare = welfaredef
-			
-			replace pline_nat = pline_nat * (welfaredef / welfarenat)
-					
-		}
+	replace pline_nat = pline_nat * (welfaredef / welfarenat)		
+}
 
 * Convert to real terms
 foreach incomevar in welfare ila ijubi itranext itranint itranp_ns itranp itrane icap inla_otro inla renta_imp ipcf itf ip inp {
@@ -89,9 +72,6 @@ foreach incomevar in welfare ila ijubi itranext itranint itranp_ns itranp itrane
 	replace `incomevar'_ppp = `incomevar'_ppp / 12 if ${year} == 2022 & "$country" == "BGD"
 }
 
-replace welfare_ppp = welfare_ppp * 12
-*replace ip_ppp = . if ip < 0
-*replace ila_ppp = . if ila_ppp < 0
 
 if $national == 0 {
 	*Make sure this is total family income

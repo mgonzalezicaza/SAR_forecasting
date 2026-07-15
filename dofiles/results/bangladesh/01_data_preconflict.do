@@ -220,7 +220,7 @@ forvalues i = 1/`col_years' {
 	****************************
 	if data[2,`i'] == 1 {
 			
-		qui use "${data_path}/${country}\Data\Baseline2025/${country}_`year'_6s_dom_yes_int_no_inc_no_cons_no_matching_yes_st_yes.dta", clear
+		qui use "${data_path}/${country}\Data\preconflict/${country}_`year'_6s_dom_yes_int_no_inc_no_cons_no_matching_yes_st_yes.dta", clear
 
 		di in red "${country} `year' loaded from simulations"
 		

@@ -64,7 +64,7 @@ mkmat B-G, mat(data)
 
 * Output file
 gl country_path "${path}/${country}"
-gl outfile "${country_path}\Results_${country}_baseline2025.xlsm"
+gl outfile "${country_path}\Results_${country}_conflict.xlsm"
 
 run "${thedo}\01_data.do"
 run "${thedo}\02_variables.do"
