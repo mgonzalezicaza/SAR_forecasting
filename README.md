@@ -1,4 +1,4 @@
-# SAR_forecasting - Project under construction
+# SAR_forecasting
 
 **SAR Regional model - Microsimulation do-files.**
 
@@ -9,3 +9,5 @@ This project adapts the LAC microsimulation model to SAR countries by differenti
 **Note 2:** The current version of the do-files are specific to the  _Spring Meetings 2026_ round of Microsimulations.
 
 **Note 3:** The _programs_ folder includes subprograms in MATA that are essential for running the simulations. Please do NOT modify them. 
+
+**Note 4:** The *oil prices* sub-folder contains programs specific to the assessment of the impact of the Middle East conflict in South Asian countries. This estimation is an additional step on top of the regular microsimulations performed for the MPO, requires the estimation of a baseline or counterfactual scenario, and is only applied for the duration of the conflict. _Documentation forthcoming_
