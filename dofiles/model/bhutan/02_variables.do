@@ -17,14 +17,17 @@ Modification date:  4/4/2024
 	1 - EMPLOYMENT STATUS
 ===================================================================================================*/
 
+* IDs
+clonevar idh = hhid
+clonevar idp = pid
+
 * Status
-rename  lstatus_year lstatus_year_orig
-gen     lstatus_year = lstatus
-replace lstatus_year = 1 if  !inlist(ip,0,.) & "${country}" == "BGD"
+* lstatus already generated
+clonevar lstatus_year = lstatus
 
 * Employment/unemployment
-gen emplyd 		= lstatus_year == 1 if welfare != . & lstatus != .
-gen unemplyd 	= lstatus_year == 2 if welfare != . & lstatus != .
+gen emplyd 		= lstatus_year == 1 if welfare != . & lstatus_year != .
+gen unemplyd 	= lstatus_year == 2 if welfare != . & lstatus_year != .
 
 * Sample
 cap drop sample
@@ -33,14 +36,11 @@ cap clonevar id	= hhid
 
 * Skill/Unskilled classification
 /*Following the ILO skill level classification[1], we classify workers into high-skilled and low-skilled. Workers in occupations such as Managers (1), Professionals (2), and Technicians and Associate professionals (3) correspond to "High-skilled" workers, whilst workers in Elementary Occupations (9) are "low-skilled." Given the diverse nature of the intermediate categories of this classification (Clerical support (4), Service and Sales (6), Skilled Agricultural, Forestry and Fisheries (6), Craft and Related Trades (7), and Plant and Machine Operators, and Assembler (8)), we added a layer to the high/low skill classification by using educational attainment and considering those with complete secondary and above as "high-skilled", and "low-skilled" otherwise. This is regardless of the workers' economic activity sector (agriculture, industry, services). Armed forces are excluded from the microsimulation model and, hence, from this classification. The table below summarizes the skill-level classification used.*/
-rename occup_year occup_year_orig
-qui sum occup_year_orig
-if r(N) == 0 gen occup_year = occup
-else gen occup_year = occup_year_orig
+gen occup_year = occup
 			
 cap drop skilled
 qui gen skilled = .
-replace skilled = 1 if inrange(occup_year,1,3) 	| (inlist(occup_year,4,5,6,7,8,.) & inlist(educat7,5,6,7))
+replace skilled = 1 if inrange(occup_year,1,3) 	| (inlist(occup_year,4,5,6,7,8,.) &  inlist(educat7,5,6,7))
 replace skilled = 0 if occup_year==9 			| (inlist(occup_year,4,5,6,7,8,.) & !inlist(educat7,5,6,7))
 replace skilled = 0 if inrange(occup_year,4,8) 	& educat7 == .
 replace skilled = . if occup_year == . & educat7 == .
@@ -60,18 +60,14 @@ egen itranint = rowtotal(itranint_m itranint_nm), m
 * Non-specified private remittances
 gen itranp_ns = itran_ns
 
-* deflate welfare // Needs to be fixed in SARMD and dlw
-if "${country}${year}" == "BGD2022" {
-	replace pline_nat = pline_nat * (welfaredef / welfarenat)		
-}
 
 * Convert to real terms
 foreach incomevar in welfare ila ijubi itranext itranint itranp_ns itranp itrane icap inla_otro inla renta_imp ipcf itf ip inp {
 	cap drop `incomevar'_ppp
 	gen `incomevar'_ppp = `incomevar' / cpi$ppp / icp$ppp
-	replace `incomevar'_ppp = `incomevar'_ppp / 12 if ${year} == 2022 & "$country" == "BGD"
 }
 
+*replace welfare_ppp = welfare_ppp * 12
 
 if $national == 0 {
 	*Make sure this is total family income
@@ -90,21 +86,13 @@ if $national == 0 {
 /* 1 "Agriculture, Hunting, Fishing, etc." 2 "Mining" 3 "Manufacturing" 4 "Public Utility Services" 5 "Construction" 6 "Commerce" 7 "Transport and Communications" 8 "Financial and Business Services" 9 "Public Administration" 10 "Others */
 local sectors_vars "industrycat10 industrycat10_2"
 foreach var of local sectors_vars {
-	cap rename `var'_year `var'_year_orig
-	qui sum `var'_year_orig
-	if r(N) == 0 recode `var' (1=1 "Agriculture") (2 3 4 5 =2 "Industry") (6 7 8 9 10 =3 "Services") , gen(sector_`var')
-	else qui recode `var'_year (1=1 "Agriculture") (2 3 4 5 =2 "Industry") (6 7 8 9 10 =3 "Services") , gen(sector_`var')
+	recode `var' (1=1 "Agriculture") (2 3 4 5 =2 "Industry") (6 7 8 9 10 =3 "Services") , gen(sector_`var')
 }
 
 ren (sector_industrycat10 sector_industrycat10_2) (sect_main sect_secu)
 
 * public job_status
-rename ocusec_year ocusec_year_orig
-qui sum ocusec_year_orig
-if r(N) == 0 gen ocusec_year = ocusec
-else gen ocusec_year = ocusec_year_orig
-label values ocusec ocusec_year ocusec_year_orig ocusec
-
+gen ocusec_year = ocusec
 gen     public_job = 0 if emplyd == 1
 replace public_job = 1 if emplyd == 1 & ocusec_year == 1
 
@@ -144,11 +132,7 @@ label values sect_main6 sect_secu6 sectors
 * labor relationship
 local relation_vars "empstat empstat_2"
 foreach var of local relation_vars {
-	rename `var'_year `var'_year_orig
-	qui sum `var'_year_orig
-	if r(N) == 0 gen `var'_year = `var'
-	else gen `var'_year = `var'_year_orig
-	label values `var'_year `var' `var'_year_orig `var'
+	gen `var'_year = `var'
 }
 
 gen salaried 	= empstat_year == 1 			if emplyd==1
@@ -192,7 +176,7 @@ if abs(tot_lai - lai_orig) > 1 & abs(tot_lai - lai_orig) != . di in red "WARNING
 drop lai_orig
 
 * total household labor incomes
-egen h_lai = sum(tot_lai) if hogarsec != 1, by(id) missing
+egen h_lai = sum(tot_lai) /*if hogarsec != 1*/, by(id) missing
 
 * Household size
 clonevar h_size = hsize
@@ -214,7 +198,7 @@ if $national == 0 {
 	local var "capital_ppp pensions_ppp otherinla_ppp remitt_ppp int_remit_ppp dom_remit_ppp ns_remit_ppp renta_imp_ppp transfers_ppp"
 	
 	foreach x of local var {
-		egen     h_`x' = sum(`x') if hogarsec != 1, by(id) missing
+		egen     h_`x' = sum(`x') /*if hogarsec != 1*/, by(id) missing
 		replace  h_`x' = . if h_`x' == 0	
 	}
 } 
@@ -222,7 +206,7 @@ if $national == 0 {
 rename h_*_ppp h_*
 
 * household income
-egen mm = rowtotal(h_lai h_*_remit h_pensions h_capital h_renta_imp h_otherinla h_transfers)
+egen    mm = rowtotal(h_lai h_*_remit h_pensions h_capital h_renta_imp h_otherinla h_transfers)
 replace mm = . if mm == 0 & h_inc == .
 replace mm = 0 if mm < 0
 
@@ -259,11 +243,11 @@ replace h_nlai   = . if h_nlai == 0
 ===================================================================================================*/
 	
 * education level (aggregate primary and none)
-gen educ_lev = educat5 - 1
+gen     educ_lev = educat5 - 1
 replace educ_lev = 1 if educ_lev ==0
 
 * household head
-gen h_head = (relationharm == 1)
+*gen h_head = (relationharm == 1)
 
 * marital status
 gen married = (marital == 1) if marital != .

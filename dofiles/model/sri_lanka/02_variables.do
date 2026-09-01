@@ -85,7 +85,7 @@ if "${country}${year}" == "BGD2022" {
 * Convert to real terms
 foreach incomevar in welfare ila ijubi itranext itranint itranp_ns itranp itrane icap inla_otro inla renta_imp ipcf itf ip inp {
 	cap drop `incomevar'_ppp
-	gen `incomevar'_ppp = `incomevar' / cpi$ppp / icp$ppp
+	gen `incomevar'_ppp = (`incomevar' * lpindex1) / cpi$ppp / icp$ppp
 	replace `incomevar'_ppp = `incomevar'_ppp / 12 if ${year} == 2022 & "$country" == "BGD"
 }
 

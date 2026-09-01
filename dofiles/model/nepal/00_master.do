@@ -7,8 +7,8 @@ Authors:			Sergio Olivieri & Kelly Y. Montoya
 E-mail:				solivieri@worldbank.org; kmontoyamunoz@worldbank.org
 Creation Date:		11/4/2024
 
-Last Modification:	Kelly Y. Montoya (kmontoyamunoz@worldbank.org)
-Modification date:  3/14/2025
+Last Modification:	Sergio Olivieri (solivieri@worldbank.org)
+Modification date:  5/6/2026
 ===================================================================================================*/
 
 version 17.0
@@ -32,29 +32,35 @@ set more off
 * NOTE: YOU ONLY NEED TO CHANGE THESE OPTIONS
 
 * Globals for general paths
-gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
+loc ppath   = 1
+if `ppath' == 1 gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
+else            gl priv_path 	"C:\Users\wb316966\WBG\Kelly Yelitza Montoya Munoz - Microsimulations"
+
 gl path  		"$priv_path\SM2026"
-gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\bangladesh"	// Do-files path
+gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\nepal"	// Do-files path
 
 * Globals for country-year identification
-gl cpi_version 	14
+gl cpi_version 	15
 gl ppp 			2021	// Change for "yes" / "no" depending on the version
-gl country 		"BGD" 	// Country to upload
+gl country 		"NPL" 	// Country to upload
 gl year 		2022	// Year to upload - Base year dataset
 gl final_year 	2028	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_preconflict.xlsm" // Country's input Excel file
+loc scenario = 1
+if `scenario' == 1 gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_preconflict.xlsm" // Country's input Excel file for preconflict scenario
+else               gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_conflict.xlsm"    // Country's input Excel file for conflict scenario
+
 cap mkdir 	"${path}/${country}\Data"
 gl data_out "${path}/${country}\Data"
 
 * Parameters
 gl sector_model 	6 		// Change for "3" or "6" to change intrasectoral variation
-gl inc_re_scale 	"no" 	// Change for "yes"/"no" re-scale labor income using gdp
-gl matching			"yes"	// Change for "yes" or "no" to activate matching for consumption to inncome ratio
+gl inc_re_scale 	"yes" 	// Change for "yes"/"no" re-scale labor income using gdp
+gl matching			"yes"	// Change for "yes" or "no" to activate matching for consumption to income ratio
 gl standardization	"yes"	// Performs variables standardization before matching
-gl rn_int_remitt 	"no" 	// Change for "yes" or "no" (neutral distribution) on modelling intern. remittances
-gl rn_dom_remitt 	"yes" 	// Change for "yes" or "no" (neutral distribution) on modelling domestic remittances
+gl rn_int_remitt 	"yes" 	// Change for "yes" or "no" (random allocation) on modelling intern. remittances
+gl rn_dom_remitt 	"yes" 	// Change for "yes" or "no" (random allocation) on modelling domestic remittances
 gl cons_re_scale 	"no" 	// Change for "yes"/"no" re-scale final consumption using private consumption
 
 
@@ -75,17 +81,16 @@ local modules "IND LBR INC"
 foreach m of local modules {
 	
 	di in red "`m'"
-	if "${country}" == "BGD" & ${year} == 2016 & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(BGD_2016_HIES_v01_M_v07_A_SARMD_IND.dta) clear nocpi
-	if "${country}" == "BGD" & ${year} == 2022 & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(BGD_2022_HIES_v02_M_v05_A_SARMD_IND.dta) clear nocpi
-	else if "${country}" == "LKA" & inlist(${year},2009,2012) & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(LKA_${year}_HIES_v01_M_v06_A_SARMD_IND.dta) clear nocpi
-	else dlw, count("${country}") y(${year}) t(sarmd) mod(`m') clear nocpi
+	if "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') verm(03) vera(01) clear
+	else dlw, count("${country}") y(${year}) t(sarmd) mod(`m') clear
+	cap drop __000000
 	tempfile `m'
 	save ``m'', replace	
 }
 		
 * Merge
 use `IND'
-merge 1:1 hhid pid using `LBR', nogen keep(1 3) force
+merge 1:1 hhid pid using `LBR', nogen keep(1 3)
 merge 1:1 hhid pid using `INC', nogen keep(1 3)
 merge m:1 countrycode year using `dlwcpi', nogen keep(1 3)
 
@@ -144,13 +149,16 @@ foreach f of local files{
 	- Quick summary
 ===================================================================================================*/
 
-sum poor* [aw = fexp_s] if welfare_s != .
+gen pline_nat_ppp = (pline_nat / cpi$ppp / icp$ppp)/12
+
+apoverty welfare_s    [aw = fexp_s]    if welfare_s    != ., varpl(pline_nat_ppp) h igr gen(poor_nat)
+apoverty welfare_base [aw = fexp_base] if welfare_base != ., varpl(pline_nat_ppp) h igr gen(poor_nat_base)
+
+sum poor11 poor21 poor31 [aw = fexp_s] if welfare_s != .
 ineqdec0 welfare_s [aw = fexp_s]
 
-gen pline_nat_ppp = pline_nat / cpi$ppp / icp$ppp
-apoverty welfare_s [aw = fexp_s] if welfare_s != ., varpl(pline_nat_ppp) h igr gen(poor_nat)
-
-apoverty welfare_base [aw = fexp_base] if welfare_base != ., varpl(pline_nat_ppp) h igr gen(poor_nat_base)
+sum poor1_base poor2_base poor3_base [aw = fexp_base] if welfare_base != .
+ineqdec0 welfare_base [aw = fexp_base]
 
 /*===================================================================================================
 	- Display running time

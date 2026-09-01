@@ -87,11 +87,11 @@ foreach x of local nl_incomes2 {
 
 
 /*===================================================================================================
-	2 - Public transfers - Sri Lanka: disaggregate into programs, apply specific growth rates
+	2 - Public transfers, imputed rent, other remittances, and other non-labor income - Remain constant in real terms
 ===================================================================================================*/
 
 * Public transfers
-do "${thedo}\social_programs.do"
+gen h_transfers_s = h_transfers
 
 * Other non-labor income 
 gen h_otherinla_s = h_otherinla

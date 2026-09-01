@@ -8,7 +8,7 @@ E-mail:				solivieri@worldbank.org; kmontoyamunoz@worldbank.org
 Creation Date:		11/4/2024
 
 Last Modification:	Kelly Y. Montoya (kmontoyamunoz@worldbank.org)
-Modification date:  4/4/2024
+Modification date:  5/14/2026
 ===================================================================================================*/
 
 * NOTE: Be careful: check by-one-bye
@@ -16,6 +16,15 @@ Modification date:  4/4/2024
 /*===================================================================================================
 	1 - EMPLOYMENT STATUS
 ===================================================================================================*/
+
+if "${country}${year}" == "NPL2022" { // Needs adjustment in the harmonizaton
+
+			cap drop lstatus
+			gen lstatus = 1 if q09_02 == 1 | q09_03 == 1 | q09_04 == 1 | q09_05 == 1 | q09_07 == 1 
+			replace lstatus = 2 if (q09_18 == 1 & inrange(q09_20,1,11)) | (q09_19 == 1 & inlist(q09_22,1,2)) 
+			replace  lstatus  = 3 if (q09_18 == 1 & !inrange(q09_20,1,11)) | (q09_18 == 2 & (q09_19 == 2 | (q09_19 == 1 & !inlist(q09_22,1,2))))
+		
+		}
 
 * Status
 rename  lstatus_year lstatus_year_orig
@@ -30,6 +39,8 @@ gen unemplyd 	= lstatus_year == 2 if welfare != . & lstatus != .
 cap drop sample
 gen sample 		= age > 14 & age != .
 cap clonevar id	= hhid
+cap clonevar idh = hhid
+cap clonevar idp = pid
 
 * Skill/Unskilled classification
 /*Following the ILO skill level classification[1], we classify workers into high-skilled and low-skilled. Workers in occupations such as Managers (1), Professionals (2), and Technicians and Associate professionals (3) correspond to "High-skilled" workers, whilst workers in Elementary Occupations (9) are "low-skilled." Given the diverse nature of the intermediate categories of this classification (Clerical support (4), Service and Sales (6), Skilled Agricultural, Forestry and Fisheries (6), Craft and Related Trades (7), and Plant and Machine Operators, and Assembler (8)), we added a layer to the high/low skill classification by using educational attainment and considering those with complete secondary and above as "high-skilled", and "low-skilled" otherwise. This is regardless of the workers' economic activity sector (agriculture, industry, services). Armed forces are excluded from the microsimulation model and, hence, from this classification. The table below summarizes the skill-level classification used.*/
@@ -62,16 +73,36 @@ gen itranp_ns = itran_ns
 
 * deflate welfare // Needs to be fixed in SARMD and dlw
 if "${country}${year}" == "BGD2022" {
-	replace pline_nat = pline_nat * (welfaredef / welfarenat)		
-}
+
+			sum   zu_cbn [aw=wgt] 
+			local mean_nat = r(mean)
+			
+			/*
+			sum   welfare [aw=wgt] 
+			local avg = r(mean)
+
+			gen welfare_adj = welfare*`mean_nat'/zu_cbn
+			sum welfare_adj [aw=wgt] 
+			local avg2 = r(mean)
+			replace welfare = welfare_adj*`avg'/`avg2'
+			drop welfare_adj
+			*/
+			replace welfare = welfaredef
+			
+			replace pline_nat = pline_nat * (welfaredef / welfarenat)
+					
+		}
 
 * Convert to real terms
 foreach incomevar in welfare ila ijubi itranext itranint itranp_ns itranp itrane icap inla_otro inla renta_imp ipcf itf ip inp {
 	cap drop `incomevar'_ppp
 	gen `incomevar'_ppp = `incomevar' / cpi$ppp / icp$ppp
-	replace `incomevar'_ppp = `incomevar'_ppp / 12 if ${year} == 2022 & "$country" == "BGD"
+	replace `incomevar'_ppp = `incomevar'_ppp / 12 if "$country" == "NPL"
 }
 
+*replace welfare_ppp = welfare_ppp * 12
+*replace ip_ppp = . if ip < 0
+*replace ila_ppp = . if ila_ppp < 0
 
 if $national == 0 {
 	*Make sure this is total family income

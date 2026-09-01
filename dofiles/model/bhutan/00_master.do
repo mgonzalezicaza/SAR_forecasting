@@ -32,30 +32,32 @@ set more off
 * NOTE: YOU ONLY NEED TO CHANGE THESE OPTIONS
 
 * Globals for general paths
-gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
+loc ppath   = 1
+if `ppath' == 1 gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
+else            gl priv_path 	"C:\Users\wb316966\WBG\Kelly Yelitza Montoya Munoz - Microsimulations"
 gl path  		"$priv_path\SM2026"
-gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\bangladesh"	// Do-files path
+gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\bhutan"	// Do-files path
 
 * Globals for country-year identification
-gl cpi_version 	14
+gl cpi_version 	15
 gl ppp 			2021	// Change for "yes" / "no" depending on the version
-gl country 		"BGD" 	// Country to upload
+gl country 		"BTN" 	// Country to upload
 gl year 		2022	// Year to upload - Base year dataset
 gl final_year 	2028	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_preconflict.xlsm" // Country's input Excel file
+gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_conflict.xlsm" // Country's input Excel file
 cap mkdir 	"${path}/${country}\Data"
 gl data_out "${path}/${country}\Data"
 
 * Parameters
 gl sector_model 	6 		// Change for "3" or "6" to change intrasectoral variation
 gl inc_re_scale 	"no" 	// Change for "yes"/"no" re-scale labor income using gdp
-gl matching			"yes"	// Change for "yes" or "no" to activate matching for consumption to inncome ratio
+gl matching			"yes"	// Change for "yes" or "no" to activate matching for consumption to income ratio
 gl standardization	"yes"	// Performs variables standardization before matching
-gl rn_int_remitt 	"no" 	// Change for "yes" or "no" (neutral distribution) on modelling intern. remittances
-gl rn_dom_remitt 	"yes" 	// Change for "yes" or "no" (neutral distribution) on modelling domestic remittances
-gl cons_re_scale 	"no" 	// Change for "yes"/"no" re-scale final consumption using private consumption
+gl rn_int_remitt 	"yes" 	// Change for "yes" or "no" (neutral distribution) on modelling intern. remittances
+gl rn_dom_remitt 	"no" 	// Change for "yes" or "no" (neutral distribution) on modelling domestic remittances
+gl cons_re_scale 	"yes" 	// Change for "yes"/"no" re-scale final consumption using private consumption
 
 
 /*===================================================================================================
@@ -63,6 +65,8 @@ gl cons_re_scale 	"no" 	// Change for "yes"/"no" re-scale final consumption usin
 ===================================================================================================*/
 
 * Support module - CPIs and PPPs
+dlw, country(Support) year(2005) type(GMDRAW) surveyid(Support_2005_CPI_v15_M) filename(Final_CPI_PPP_to_be_used.dta)
+
 dlw, country(Support) year(2005) type(GMDRAW) surveyid(Support_2005_CPI_v${cpi_version}_M) filename(Final_CPI_PPP_to_be_used.dta)
 keep if code == "${country}" & year == ${year}
 keep code year cpi${ppp} icp${ppp}
@@ -70,23 +74,14 @@ rename code countrycode
 tempfile dlwcpi
 save `dlwcpi', replace
 		
-* SARMD modules - IND LBR INC
-local modules "IND LBR INC"
-foreach m of local modules {
-	
-	di in red "`m'"
-	if "${country}" == "BGD" & ${year} == 2016 & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(BGD_2016_HIES_v01_M_v07_A_SARMD_IND.dta) clear nocpi
-	if "${country}" == "BGD" & ${year} == 2022 & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(BGD_2022_HIES_v02_M_v05_A_SARMD_IND.dta) clear nocpi
-	else if "${country}" == "LKA" & inlist(${year},2009,2012) & "`m'" == "IND" dlw, count("${country}") y(${year}) t(sarmd) mod(`m') filename(LKA_${year}_HIES_v01_M_v06_A_SARMD_IND.dta) clear nocpi
-	else dlw, count("${country}") y(${year}) t(sarmd) mod(`m') clear nocpi
-	tempfile `m'
-	save ``m'', replace	
-}
+* Survey-to-survey database
+if inrange(${year},2018,2022)      use "${path}/${country}\microsims\BTN_${year}_LFS_v01_M_v01_A.dta", clear
+else if inrange(${year},2023,2025) use "${path}/${country}\microsims\BTN_${year}_QLFS_v01_M_v01_A.dta", clear
+tempfile S2S
+save `S2S', replace	
 		
 * Merge
-use `IND'
-merge 1:1 hhid pid using `LBR', nogen keep(1 3) force
-merge 1:1 hhid pid using `INC', nogen keep(1 3)
+use `S2S', clear
 merge m:1 countrycode year using `dlwcpi', nogen keep(1 3)
 
 
@@ -143,14 +138,19 @@ foreach f of local files{
 /*===================================================================================================
 	- Quick summary
 ===================================================================================================*/
+gen pline_ppp = 6203.931/ cpi2021 / icp2021
 
-sum poor* [aw = fexp_s] if welfare_s != .
+
+sum poor11 poor21 poor31 [aw = fexp_s] if welfare_s != .
 ineqdec0 welfare_s [aw = fexp_s]
+apoverty welfare_s [aw = fexp_s], varpl(pline_ppp)
 
-gen pline_nat_ppp = pline_nat / cpi$ppp / icp$ppp
-apoverty welfare_s [aw = fexp_s] if welfare_s != ., varpl(pline_nat_ppp) h igr gen(poor_nat)
 
-apoverty welfare_base [aw = fexp_base] if welfare_base != ., varpl(pline_nat_ppp) h igr gen(poor_nat_base)
+sum poor1_base poor2_base poor3_base [aw = fexp_base] if welfare_base != .
+ineqdec0 welfare_base [aw = fexp_base]
+apoverty welfare_base [aw = fexp_base], varpl(pline_ppp)
+
+
 
 /*===================================================================================================
 	- Display running time
