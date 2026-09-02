@@ -136,7 +136,7 @@ forvalues a = `second' / `end' {
 tempfile dynamics
 qui save `dynamics', replace
 
-use "${country_path}\descriptives.dta", clear
+use "${data_path}\descriptives.dta", clear
 append using `dynamics'
 
 sort indicator
@@ -145,4 +145,4 @@ egen nmis=rmiss2(y_*)
 drop if tag == 1 & nmis != 0
 drop tag nmis
 qui export excel using "${outfile}", sheet(descriptives) firstrow(variables) sheetreplace
-erase "${country_path}\descriptives.dta"
+erase "${data_path}\descriptives.dta"

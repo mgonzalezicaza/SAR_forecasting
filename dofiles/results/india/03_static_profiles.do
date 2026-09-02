@@ -75,7 +75,7 @@ foreach var of varlist v1-v6 {
    rename `var' y_`=`var'[1]'
 }
 qui drop if indicator == "_year"
-qui save "${country_path}\descriptives.dta", replace
+qui save "${data_path}\descriptives.dta", replace
 
 * Output for MPO team
 keep if inlist(indicator,"poor${pline1}1","poor${pline2}1","poor${pline3}1","gini","pg")

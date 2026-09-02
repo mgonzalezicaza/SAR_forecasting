@@ -28,11 +28,15 @@ etime, start
 
 * Paths
 gl path 		"C:\Users\WB539669\WBG\ESAPV Files - microsim/AM2026"
-//gl data_path  	"$path/input"
+gl data_path  	"$path/input"
 gl thedo    	"C:\Users\WB539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\results\india"	// Do-files path
 
 gl avail_data 	"C:\Users\WB539669\WBG\ESAPV Files - microsim\_inputs/Data availability by country.xlsx"
 gl povmod 	  "\\wurepliprdfs01\gpvfile\gpv\Knowledge_Learning\Pov Projection\Central Team\MFM-allvintages.dta"
+
+* Output file
+gl country_path "${path}/"
+gl outfile "${country_path}\Results_${country}_local.xlsm"
 
 * Other globals 
 gl country 		"IND" 	// AFG BGD BTN IND MDV NPL PAK LKA
@@ -46,6 +50,7 @@ gl pline2 /*320 365*/ 420
 gl pline3 /*550 685*/ 830
 gl prs_gp /*nnn 25*/ 28
 
+cap ssc install dm31
 
 /*==============================================================================================
  	1 - Set up simulated and actual data input files 
@@ -60,10 +65,6 @@ for any B C D E F G: qui replace X = "0" if X == "ok"
 for any B C D E F G: qui replace X = "1" if X == "sim"
 qui destring B-G, replace
 mkmat B-G, mat(data) 
-
-* Output file
-gl country_path "${path}/"
-gl outfile "${country_path}\Results_${country}.xlsm"
 
 run "${thedo}\01_data.do"
 run "${thedo}\02_variables.do"
