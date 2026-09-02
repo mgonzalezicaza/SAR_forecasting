@@ -28,15 +28,16 @@ set timeout2 400, perm
 * Modifiable globals
 
 ** Dates
-gl version 		"Apr-8-2026"
+gl version 		"Sep-2-2026"
 gl inflows 		"Seriestableview_4_8_2026"	//	Remittances file name, structure "Seriestableview_D_MM_YYYY"
-gl date_inflows "Apr-8-2026"					//	Remittances file download date
+gl date_inflows "Sep-2-2026"					//	Remittances file download date
 
 ** Paths
-gl path 		"C:\Users\wb520054\WBG\SARDATALAB - Documents\Microsimulations"
-gl dofiles 		"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations\Regional model\SAR_forecasting\dofiles\tool"
-gl mpo_version 	"${path}\SM2026" // Folder name
-gl downloads	"C:\Users\wb520054\Downloads"		// Your downloads folder for retrieving remittances file
+//gl path 		"C:\Users\wb520054\WBG\SARDATALAB - Documents\Microsimulations"
+gl path 		"C:\Users\WB539669\WBG\ESAPV Files - microsim/wb539669"
+gl dofiles 		"C:\Users\WB539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\tool"	// Do-files path
+gl mpo_version 	"${path}\AM2026" // Folder name
+gl downloads	"C:\Users\wb539669\Downloads"		// Your downloads folder for retrieving remittances file
 
 * Stable globals - Should not be changed
 gl cpi_version 	14
@@ -44,7 +45,7 @@ gl cpi_base		2021
 gl povmod 		"\\wurepliprdfs01\gpvfile\gpv\Knowledge_Learning\Pov Projection\Central Team\MFM-allvintages.dta"
 gl input_master "input_MASTER.xlsx"							// Excel file read by regional tool
 gl input_hhss_e	"inputs_hhss_elasticities.dta" 				// SARMD Input file for elasticities
-gl input_lfs_e 	"inputs_lfs_elasticities.dta" 			// SARLAB Input file for elasticities
+gl input_lfs_e 	"inputs_lfs_elasticities_IND.dta" 			// SARLAB Input file for elasticities
 cap mkdir		"${mpo_version}"							// Regional tool's path
 cap mkdir 		"${mpo_version}\_inputs"					
 gl path_mpo 	"${mpo_version}\_inputs"
@@ -53,7 +54,7 @@ cd "$path"
 
 
 * Set up households surveys - HHSS
-gl countries_hhss "BGD BTN IND MDV NPL PAK LKA" // AFG does not have CPIs nor PPPs
+gl countries_hhss "IND" // "BGD BTN IND MDV NPL PAK LKA" // AFG does not have CPIs nor PPPs
 gl init_year_hhss = 2000
 gl end_year_hhss = 2022
 /*
@@ -64,11 +65,10 @@ foreach country of global countries_hhss {
 */
 
 * Set up Labor Force Surveys
-gl countries_lfs "BGD BTN IND MDV NPL PAK LKA" 
+gl countries_lfs "IND" //"BGD BTN IND MDV NPL PAK LKA" 
 gl init_year_lfs = 2000
 gl end_year_lfs = 2022
 gl quarters "q01 q02 q03 q04"
-
 
 * Set up Elasticities - Countries to include and their RESPECTIVE year restriction
 gl countries 	"BGD 	LKA		MDV"  
@@ -85,16 +85,16 @@ gl last_year 	"2019 	2022 	2022 	2011 	2019 	2022 	2018 	2019"
 ===================================================================================================*/
 
 * 1. inputs using Households Surveys
-	*run "$dofiles\01_inputs_hhss"
+	run "$dofiles\01_inputs_hhss_IND"
 	
 * 2. inputs using Labor Force Surveys
-	*run "$dofiles\02_inputs_lfs"
+	run "$dofiles\02_inputs_lfs"
 	
 * 3. inputs using Microsimulated data
-	*run "$dofiles\03_inputs_microsims"
+	run "$dofiles\03_inputs_microsims"
 	
 * 4. merge labor inputs - hhss, lfs, and microsims
-	*run "$dofiles\04_merge_inputs_labor"
+	run "$dofiles\04_merge_inputs_labor"
 	
 * 5. elasticities
 	run "$dofiles\05_elasticities"

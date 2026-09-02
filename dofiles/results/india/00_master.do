@@ -27,7 +27,7 @@ etime, start
 ==============================================================================================*/
 
 * Paths
-gl path 		"C:\Users\WB539669\WBG\ESAPV Files - microsim/AM2026"
+gl path 		"C:\Users\WB539669\WBG\ESAPV Files - microsim/wb539669/AM2026"
 gl data_path  	"$path/input"
 gl thedo    	"C:\Users\WB539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\results\india"	// Do-files path
 

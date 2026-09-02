@@ -32,7 +32,7 @@ foreach country of global countries_lfs { // Open loop countries
 		
 		if !inlist("`country'`year'","BGD2005","BGD2010","BGD2013","BGD2015","BGD2016","BGD2022") /// 
 		 & !inlist("`country'`year'","BTN2018","BTN2019","BTN2020") /// 
-		 & !inlist("`country'`year'","IND2020","IND2021","IND2022","IND2023") /// 
+		 & !inlist("`country'`year'","IND2020","IND2021","IND2022","IND2023","IND2024","IND2025") /// 
 		 & !inlist("`country'`year'","NPL2017") /// 
 		 & !inlist("`country'`year'","PAK2013","PAK2017","PAK2018","PAK2020") /// 
 		 & !inlist("`country'`year'","LKA2019","LKA2020","LKA2021","LKA2022") ///

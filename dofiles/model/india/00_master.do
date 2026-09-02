@@ -19,7 +19,6 @@ cap ssc install ainequal
 cap ssc install ainequal0
 etime, start
 
-
 clear all
 clear mata
 clear matrix
@@ -32,7 +31,7 @@ set more off
 * NOTE: YOU ONLY NEED TO CHANGE THESE OPTIONS
 
 * Globals for general paths
-gl priv_path 	"C:\Users\WB539669\WBG\ESAPV Files - microsim"
+gl priv_path 	"C:\Users\WB539669\WBG\ESAPV Files - microsim/wb539669"
 gl path  		"$priv_path\AM2026"
 gl thedo    	"C:\Users\WB539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\model\india"	// Do-files path
 
@@ -41,10 +40,10 @@ gl cpi_version 	15
 gl ppp 			2021	// Change for "yes" / "no" depending on the version
 gl country 		"IND" 	// Country to upload
 gl year 		2023	// Year to upload - Base year dataset
-gl final_year 	2028	// Change for last simulated year
+gl final_year 	2029	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${priv_path}\AM2026\input\Microsimulation_Inputs_${country}.xlsm" // SAVED LOCALLY
+gl inputs   "${priv_path}\AM2026\input\Microsimulation_Inputs_${country}_local.xlsm" // SAVED LOCALLY
 cap mkdir 	"${priv_path}\AM2026\data"
 gl data_out "${priv_path}\AM2026\data"
 
@@ -133,6 +132,7 @@ foreach f of local files{
 	- Quick summary
 ===================================================================================================*/
 
+di in red "FOR YEAR ${model}"
 sum poor11 poor21 poor31 [aw = fexp_s] if welfare_s != .
 ineqdec0 welfare_s [aw = fexp_s]
 

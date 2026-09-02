@@ -31,7 +31,7 @@ gl date_inflows "Apr-1-2026"					//	Remittances file download date
 ** Paths
 gl path 		"C:\Users\wb539669\WBG\ESAPV Files - microsim/wb539669/AM2026"
 gl dofiles 		"C:\Users\wb539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\tool"	// Do-files path
-gl mpo_version 	"${path}\AM2026" // Folder name
+gl mpo_version 	"${path}\" // Folder name
 gl downloads	"C:\Users\wb539669\Downloads"		// Your downloads folder for retrieving remittances file
 
 * Stable globals - Should not be changed
@@ -41,8 +41,8 @@ gl povmod 		"\\wurepliprdfs01\gpvfile\gpv\Knowledge_Learning\Pov Projection\Cent
 gl input_master "input_MASTER.xlsx"							// Excel file read by regional tool
 *gl input_hhss_e	"inputs_hhss_elasticities.dta" 				// SARMD Input file for elasticities
 *gl input_lfs_e 	"inputs_lfs_elasticities.dta" 			// SARLAB Input file for elasticities
-cap mkdir		"${mpo_version}"							// Regional tool's path
-cap mkdir 		"${mpo_version}\_inputs"					
+//cap mkdir		"${mpo_version}"							// Regional tool's path
+//cap mkdir 		"${mpo_version}\_inputs"					
 gl path_mpo 	"${mpo_version}\_inputs"
 
 cd "$path"
@@ -52,7 +52,7 @@ cd "$path"
 	1.2 - Estimations
 ===========================================================================================*/
 
-use "${path}/input/IND_allyears_PLFS_V1_final_v01_M_cpi_microsim.dta" , clear
+use "${path}/input/IND_CYyears_PLFS_V1_final_v01_M_cpi_microsim.dta" , clear
 
 loc country "IND"
 

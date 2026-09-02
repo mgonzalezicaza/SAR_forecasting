@@ -124,6 +124,10 @@ cap erase "${data_out}/simulated.dta"
 
 save "${data_out}/${country}_${model}_${sector_model}s_dom_${rn_dom_remitt}_int_${rn_int_remitt}_inc_${inc_re_scale}_cons_${cons_re_scale}_matching_${matching}_st_${standardization}.dta", replace
 
+* QUICK FIX
+//save "${data_out}/${country}_${final_year}_${sector_model}s_dom_${rn_dom_remitt}_int_${rn_int_remitt}_inc_${inc_re_scale}_cons_${cons_re_scale}_matching_${matching}_st_${standardization}.dta", replace
+
+
 
 /*===================================================================================================
 	- END
