@@ -32,9 +32,9 @@ set more off
 * NOTE: YOU ONLY NEED TO CHANGE THESE OPTIONS
 
 * Globals for general paths
-gl priv_path 	"C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations"
-gl path  		"$priv_path\SM2026"
-gl thedo    	"$priv_path\Regional model\SAR_forecasting\dofiles\model\india"	// Do-files path
+gl priv_path 	"C:\Users\WB539669\WBG\ESAPV Files - microsim"
+gl path  		"$priv_path\AM2026"
+gl thedo    	"C:\Users\WB539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\model\india"	// Do-files path
 
 * Globals for country-year identification
 gl cpi_version 	15
@@ -44,9 +44,9 @@ gl year 		2023	// Year to upload - Base year dataset
 gl final_year 	2028	// Change for last simulated year
 
 * Globals for country-specific paths
-gl inputs   "${path}/${country}\Microsimulation_Inputs_${country}_conflict.xlsm" // Country's input Excel file
-cap mkdir 	"${path}/${country}\Data"
-gl data_out "${path}/${country}\Data"
+gl inputs   "${priv_path}\AM2026\input\Microsimulation_Inputs_${country}.xlsm" // SAVED LOCALLY
+cap mkdir 	"${priv_path}\AM2026\data"
+gl data_out "${priv_path}\AM2026\data"
 
 * Parameters
 gl sector_model 	6 		// Change for "3" or "6" to change intrasectoral variation
@@ -72,7 +72,7 @@ tempfile dlwcpi
 save `dlwcpi', replace
 
 * Imputed LFS data
-use "${priv_path}\SM2026\IND\input\IND_allyears_PLFS_V1_final_v01_M_cpi_microsim.dta", clear
+use "${priv_path}\AM2026\input\IND_allyears_PLFS_V1_final_v01_M_cpi_microsim.dta", clear
 keep if year == ${year}
 		
 * Merge

@@ -26,7 +26,7 @@ forvalues i = 1/`col_years' {
 		save `dlwcpi', replace
 
 		* India actual data follows the same harmonized source used in model/india
-		qui use "${data_path}/${country}\input/IND_allyears_PLFS_V1_final_v01_M_cpi_microsim.dta", clear
+		qui use "${path}/input/IND_allyears_PLFS_V1_final_v01_M_cpi_microsim.dta", clear
 		keep if year == `year'
 		cap gen countrycode = "${country}"
 		merge m:1 year using `dlwcpi', nogen keep(1 3)
@@ -154,7 +154,8 @@ forvalues i = 1/`col_years' {
 	****************************
 	if data[2,`i'] == 1 {
 			
-		if "${country}" == "IND" qui use "${data_path}/${country}\Data\conflict/${country}_`year'_6s_dom_no_int_no_inc_no_cons_no_matching_yes_st_yes.dta", clear
+		//if "${country}" == "IND" qui use "${path}/data/${country}_`year'_6s_dom_no_int_no_inc_no_cons_no_matching_yes_st_yes.dta", clear
+		if "${country}" == "IND" qui use "${path}/data/${country}_2028_6s_dom_no_int_no_inc_no_cons_no_matching_yes_st_yes.dta", clear
 
 		di in red "${country} `year' loaded from simulations"
 		

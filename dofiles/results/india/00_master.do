@@ -26,12 +26,12 @@ etime, start
  	0 - Globals - Please check these globals carefully 
 ==============================================================================================*/
 
-
 * Paths
-gl path "C:\Users\wb520054\WBG\SARDATALAB - Documents\Microsimulations\SM2026"
-gl data_path "C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations\SM2026"
-gl thedo     "C:\Users\wb520054\OneDrive - WBG\02_SAR Stats Team\Microsimulations\Regional model\SAR_forecasting\dofiles\results\india"	// Do-files path
-gl avail_data "${path}\_inputs\Data availability by country.xlsx"
+gl path 		"C:\Users\WB539669\WBG\ESAPV Files - microsim/AM2026"
+//gl data_path  	"$path/input"
+gl thedo    	"C:\Users\WB539669\OneDrive - WBG\Documents\GitHub\SAR_forecasting\dofiles\results\india"	// Do-files path
+
+gl avail_data 	"C:\Users\WB539669\WBG\ESAPV Files - microsim\_inputs/Data availability by country.xlsx"
 gl povmod 	  "\\wurepliprdfs01\gpvfile\gpv\Knowledge_Learning\Pov Projection\Central Team\MFM-allvintages.dta"
 
 * Other globals 
@@ -51,20 +51,19 @@ gl prs_gp /*nnn 25*/ 28
  	1 - Set up simulated and actual data input files 
 ==============================================================================================*/
 
-
 * IMPORTANT: Some countries have data restrictions. Please check the name file and years before running.
 
-* Data availability input
+* Data availability input 
 import excel "${avail_data}", sheet("Sheet1") cellrange(A1:G9) clear
 qui keep if inlist(A,"Country","${country}")
 for any B C D E F G: qui replace X = "0" if X == "ok"
 for any B C D E F G: qui replace X = "1" if X == "sim"
 qui destring B-G, replace
-mkmat B-G, mat(data)
+mkmat B-G, mat(data) 
 
 * Output file
-gl country_path "${path}/${country}"
-gl outfile "${country_path}\Results_${country}_conflict.xlsm"
+gl country_path "${path}/"
+gl outfile "${country_path}\Results_${country}.xlsm"
 
 run "${thedo}\01_data.do"
 run "${thedo}\02_variables.do"
@@ -76,7 +75,6 @@ run "${thedo}\07_pop_wdi.do"
 
 * Display running time	
 etime
-
 
 /*==============================================================================================
   - END
